@@ -1,6 +1,6 @@
 #!/bin/bash
 # migrate-to-new-account.sh - 一键复刻配置到新 GitHub 账号
-# 使用方法: NEW_GITHUB_USERNAME='new-name' NEW_REPO_NAME='my-dev-ops' ./scripts/migrate-to-new-account.sh
+# 使用方法: NEW_GITHUB_USERNAME='new-name' NEW_REPO_NAME='your-repo' ./scripts/migrate-to-new-account.sh
 
 set -e
 
@@ -14,7 +14,7 @@ if [ -z "$NEW_GITHUB_USERNAME" ] || [ -z "$NEW_REPO_NAME" ]; then
     echo ""
     echo "用法:"
     echo "  export NEW_GITHUB_USERNAME='your-new-username'"
-    echo "  export NEW_REPO_NAME='my-dev-ops'"
+    echo "  export NEW_REPO_NAME='your-config-repo'"
     echo "  ./scripts/migrate-to-new-account.sh"
     echo ""
     exit 1
@@ -133,16 +133,11 @@ echo "   访问: https://github.com/$NEW_GITHUB_USERNAME/$NEW_REPO_NAME"
 echo "   点击: 'Code' → 'Codespaces' → 'Create codespace'"
 echo ""
 echo "2. 运行环境恢复脚本:"
-echo "   ./scripts/setup-env.sh"
+echo "   ./scripts/init-links.sh"
 echo ""
 echo "3. 验证配置:"
 echo "   ls -la ~/.config/opencode     # 检查软链接"
 echo "   opencode --version            # 测试工具"
-echo ""
-echo "4. 在新项目中使用（子模块模式）:"
-echo "   cd /workspaces/new-project"
-echo "   git submodule add $NEW_REPO_URL .dev-ops"
-echo "   bash .dev-ops/scripts/setup-env.sh"
 echo ""
 echo "================================"
 echo "🔗 重要链接:"

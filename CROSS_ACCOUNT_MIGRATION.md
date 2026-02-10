@@ -477,26 +477,26 @@ git push
 
 #### 方式 A: 邀请协作（最快，适合团队）
 
-1. 在原账号的 `my-dev-ops` 仓库设置中，将新账号添加为 **Collaborator**
+1. 在原账号的 `config-repo` 仓库设置中，将新账号添加为 **Collaborator**
 2. 新账号接受邀请后即可访问
 
 #### 方式 B: 仓库克隆与重新上传（推荐，适合个人）
 
 ```bash
 # 1. 在原账号中克隆仓库到本地
-git clone https://github.com/old-account/my-dev-ops.git
-cd my-dev-ops
+git clone https://github.com/old-account/config-repo.git
+cd config-repo
 
 # 2. 添加新账号的远程仓库
-git remote add new-origin https://github.com/new-account/my-dev-ops.git
+git remote add new-origin https://github.com/new-account/config-repo.git
 
 # 3. 推送到新账号
 # 注意：由于 .gitignore 配置，敏感信息不会被推送
 git push new-origin main
 
 # 或者在新账号重新创建仓库
-# 1. 在 GitHub 新账号创建空的私有仓库 my-dev-ops
-# 2. git remote set-url origin https://github.com/new-account/my-dev-ops.git
+# 1. 在 GitHub 新账号创建空的私有仓库 config-repo
+# 2. git remote set-url origin https://github.com/new-account/config-repo.git
 # 3. git push -u origin main
 ```
 
@@ -527,8 +527,8 @@ GitHub Secrets 是绑定在账号或仓库级别的，必须重新配置。
 
 ```bash
 # 1. 在新账号下克隆配置仓库
-git clone https://github.com/new-account/my-dev-ops.git
-cd my-dev-ops
+git clone https://github.com/new-account/config-repo.git
+cd config-repo
 
 # 2. 运行恢复脚本
 ./scripts/init-links.sh
@@ -542,7 +542,7 @@ ls -la ~/.config/opencode/credentials.json  # 应存在且由 Secrets 注入
 ```bash
 # 1. 在新项目中添加配置中心为子模块
 cd /workspaces/new-project
-git submodule add https://github.com/new-account/my-dev-ops.git .dev-ops
+git submodule add https://github.com/new-account/config-repo.git .dev-ops
 git submodule update --init --recursive
 
 # 2. 运行设置脚本
@@ -576,7 +576,7 @@ echo ""
 if [ -z "$NEW_GITHUB_USERNAME" ] || [ -z "$NEW_REPO_NAME" ]; then
     echo "❌ 错误: 请设置环境变量"
     echo "   export NEW_GITHUB_USERNAME='your-new-username'"
-    echo "   export NEW_REPO_NAME='my-dev-ops'"
+    echo "   export NEW_REPO_NAME='config-repo'"
     exit 1
 fi
 
@@ -647,7 +647,7 @@ git config --global user.email
 # 公司账号定期拉取更新
 
 # 公司账号操作
-git remote add personal https://github.com/personal-account/my-dev-ops.git
+git remote add personal https://github.com/personal-account/config-repo.git
 git fetch personal
 git merge personal/main  # 合并个人账号的更新
 ```
@@ -676,21 +676,21 @@ git checkout -b account/company
 
 ```bash
 # 1. 创建一个公开的模板仓库（不含敏感信息）
-# my-dev-ops-template/  # 公开
+# config-repo-template/  # 公开
 #   ├── scripts/
 #   ├── .gitignore
 #   └── README.md
 
 # 2. 每个账号 fork 或复制模板
-git clone https://github.com/template/my-dev-ops-template.git my-dev-ops
-cd my-dev-ops
+git clone https://github.com/template/config-repo-template.git config-repo
+cd config-repo
 
 # 3. 添加自己的配置
 ./scripts/add-tool.sh
 ./scripts/save-config.sh "init: personal config"
 
 # 4. 推送到自己的私有仓库
-git remote set-url origin https://github.com/my-account/my-dev-ops.git
+git remote set-url origin https://github.com/my-account/config-repo.git
 git push -u origin main
 ```
 
