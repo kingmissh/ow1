@@ -59,7 +59,8 @@ ow1/
 ├── .config-mapping            # 🗺️ 配置映射文件（软链接目标定义）
 ├── .devcontainer/
 │   └── devcontainer.json      # postCreateCommand 自动调用 init-links.sh
-├── ENV_SYSTEM_MASTER.md       # 📖 完整文档（架构 + SOP + 故障排除）
+├── USAGE_SCENARIOS.md         # ⭐ 使用场景指南（8个详细场景）
+├── ENV_SYSTEM_MASTER.md       # 📖 完整技术文档
 ├── QUICK_REFERENCE.md         # 🎴 命令速查卡
 └── README.md                  # 📍 本文件（快速开始）
 ```
@@ -153,12 +154,20 @@ reset-config
 
 ## 📖 详细文档
 
-- **[ENV_SYSTEM_MASTER.md](./ENV_SYSTEM_MASTER.md)** - 完整文档包含：
+- **[USAGE_SCENARIOS.md](./USAGE_SCENARIOS.md)** - ⭐ 使用场景指南（推荐先读）
+  - 8 个详细使用场景
+  - 完整操作流程
+  - 实际命令输出示例
+  - 故障排查指南
+
+- **[ENV_SYSTEM_MASTER.md](./ENV_SYSTEM_MASTER.md)** - 完整技术文档
   - 系统架构设计
   - 脚本详细说明
-  - 标准操作流程（4 大场景）
+  - 标准操作流程
   - 跨账号迁移指南
   - 故障排除手册
+
+- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - 快速命令参考
 
 ---
 
