@@ -1,0 +1,10 @@
+# Sync-Link 配置映射
+# 格式: 存储名称=目标路径
+# 示例:
+# opencode=$HOME/.config/opencode
+# openclaw=$HOME/.openclaw
+# git=$HOME/.config/git
+# vim=$HOME/.vim
+
+openclaw=$HOME/.openclaw
+opencode=$HOME/.config/opencode

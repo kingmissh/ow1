@@ -5,8 +5,12 @@
 
 set -e
 
-REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || dirname "$(cd "$(dirname "$0")" && pwd)")
-REPO_STORE="$REPO_ROOT/.config-store"
+# 加载共享库
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib.sh"
+
+REPO_ROOT=$(get_repo_root)
+REPO_STORE=$(get_repo_store)
 
 # 检查参数
 if [ $# -lt 2 ]; then
@@ -46,9 +50,8 @@ fi
 
 # 备份现有存储
 if [ -e "$STORE_PATH" ]; then
-    BACKUP="$STORE_PATH.backup.$(date +%s)"
-    echo "📝 备份现有存储..."
-    mv "$STORE_PATH" "$BACKUP"
+    backup_file=$(backup_if_exists "$STORE_PATH")
+    echo "📝 备份现有存储到: $backup_file"
 fi
 
 # 复制配置到仓库
@@ -73,15 +76,20 @@ echo ""
 
 # 删除原配置并建立软链接
 echo "🔗 建立软链接..."
-rm -rf "$SOURCE_PATH"
-ln -s "$STORE_PATH" "$SOURCE_PATH"
+create_symlink "$STORE_PATH" "$SOURCE_PATH" "$TOOL_NAME"
 
 echo ""
 echo "✅ $TOOL_NAME 已纳入管理！"
 echo ""
+
+# 添加到配置文件
+echo "$TOOL_NAME=\$HOME/$2" >> "$REPO_ROOT/.config-mapping"
+echo "📝 已添加到 .config-mapping"
+
+echo ""
 echo "📋 下一步:"
 echo "   1. 检查配置: ls -la $STORE_PATH"
 echo "   2. 测试工具: $TOOL_NAME --version"
-echo "   3. 提交更改: save-commit"
+echo "   3. 提交更改: ./scripts/save-config.sh"
 echo ""
 echo "💡 提示: 配置更改会自动同步到 Git"

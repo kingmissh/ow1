@@ -13,7 +13,6 @@
   
   "postStartCommand": "echo '🚀 快捷命令: save (查看更改) | save-commit (提交) | reset-config (回滚)'",
   
-  "onCreateCommand": "echo 'alias' >> /home/codespace/.bashrc",
   
   "customizations": {
     "vscode": {

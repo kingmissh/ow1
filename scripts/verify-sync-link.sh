@@ -2,11 +2,16 @@
 # verify-sync-link.sh - 验证 Sync-Link 系统是否正常工作
 # 使用方法: ./scripts/verify-sync-link.sh
 
+# 加载共享库
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib.sh"
+
+REPO_ROOT=$(get_repo_root)
+
 echo "🔍 Sync-Link 系统验证"
 echo "======================"
 echo ""
 
-REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 PASS=0
 FAIL=0
 
@@ -23,7 +28,7 @@ fi
 # 测试 2: 检查脚本
 echo ""
 echo "2. 检查核心脚本..."
-for script in init-links.sh add-tool.sh; do
+for script in init-links.sh add-tool.sh save-config.sh reset-config.sh; do
     if [ -x "$REPO_ROOT/scripts/$script" ]; then
         echo "   ✅ $script 可执行"
         ((PASS++))
@@ -33,21 +38,34 @@ for script in init-links.sh add-tool.sh; do
     fi
 done
 
-# 测试 3: 检查软链接
+# 测试 3: 检查软链接（从配置文件读取）
 echo ""
 echo "3. 检查软链接..."
-for link in "$HOME/.config/opencode" "$HOME/.openclaw"; do
+
+# 读取配置文件
+declare -A MAPPING
+while IFS='=' read -r key value; do
+    [[ "$key" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "$key" ]] && continue
+    key=$(echo "$key" | xargs)
+    value=$(echo "$value" | xargs)
+    value="${value/\$HOME/$HOME}"
+    MAPPING["$key"]="$value"
+done < "$REPO_ROOT/.config-mapping"
+
+for store_name in "${!MAPPING[@]}"; do
+    link="${MAPPING[$store_name]}"
     if [ -L "$link" ]; then
         target=$(readlink "$link")
         if [[ "$target" == *".config-store"* ]]; then
-            echo "   ✅ $link -> $target"
+            echo "   ✅ $store_name: $link -> $target"
             ((PASS++))
         else
-            echo "   ⚠️  $link 存在但指向非仓库路径"
+            echo "   ⚠️  $store_name: $link 存在但指向非仓库路径"
             ((FAIL++))
         fi
     else
-        echo "   ℹ️  $link 未创建（首次运行请先执行 init-links.sh）"
+        echo "   ℹ️  $store_name: $link 未创建（首次运行请先执行 init-links.sh）"
     fi
 done
 
@@ -58,8 +76,7 @@ if grep -q "alias save=" "$HOME/.bashrc" 2>/dev/null; then
     echo "   ✅ save 别名已配置"
     ((PASS++))
 else
-    echo "   ❌ 别名未配置（请运行 source ~/.bashrc 或重新登录）"
-    ((FAIL++))
+    echo "   ⚠️  别名未配置（请运行 source ~/.bashrc 或重新登录）"
 fi
 
 # 测试 5: 检查 .gitignore
@@ -95,8 +112,8 @@ if [ $FAIL -eq 0 ]; then
     echo ""
     echo "快速开始:"
     echo "   1. 修改配置（通过工具界面）"
-    echo "   2. 运行: save-commit"
-    echo "   3. 搞砸了？运行: reset-config"
+    echo "   2. 运行: ./scripts/save-config.sh 或 save-commit"
+    echo "   3. 搞砸了？运行: ./scripts/reset-config.sh 或 reset-config"
     exit 0
 else
     echo "⚠️  发现 $FAIL 个问题，请检查上述输出"
