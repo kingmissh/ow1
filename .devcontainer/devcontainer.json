@@ -9,11 +9,10 @@
     }
   },
   
-  "postCreateCommand": "bash scripts/init-links.sh && echo '✅ Sync-Link 环境已初始化。运行 source ~/.bashrc 加载快捷命令'",
-  
+  "postCreateCommand": "git submodule update --init --recursive && bash .dev-ops/scripts/init-links.sh && echo '✅ Sync-Link 环境已初始化。运行 source ~/.bashrc 加载快捷命令'",
+
   "postStartCommand": "echo '🚀 快捷命令: save (查看更改) | save-commit (提交) | reset-config (回滚)'",
-  
-  
+
   "customizations": {
     "vscode": {
       "extensions": [
@@ -28,8 +27,8 @@
       }
     }
   },
-  
+
   "remoteEnv": {
-    "CONFIG_STORE": "/workspaces/ow1/.config-store"
+    "CONFIG_STORE": "/workspaces/ow1/.dev-ops/.config-store"
   }
 }
