@@ -9,6 +9,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 
+# 检查依赖
+check_dependencies "rsync" "git" || exit 1
+
 REPO_ROOT=$(get_repo_root)
 REPO_STORE=$(get_repo_store)
 
@@ -50,8 +53,10 @@ fi
 
 # 备份现有存储
 if [ -e "$STORE_PATH" ]; then
-    backup_file=$(backup_if_exists "$STORE_PATH")
-    echo "📝 备份现有存储到: $backup_file"
+    backup_file=$(backup_if_exists "$STORE_PATH" 2>/dev/null) || true
+    if [ -n "$backup_file" ]; then
+        echo "📝 备份现有存储到: $backup_file"
+    fi
 fi
 
 # 复制配置到仓库

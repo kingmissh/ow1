@@ -4,6 +4,13 @@
 
 set -e
 
+# 加载共享库
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib.sh"
+
+# 检查依赖
+check_dependencies "git" || exit 1
+
 echo "🚀 Codespaces 配置迁移工具"
 echo "================================"
 echo ""
@@ -21,6 +28,7 @@ if [ -z "$NEW_GITHUB_USERNAME" ] || [ -z "$NEW_REPO_NAME" ]; then
 fi
 
 NEW_REPO_URL="https://github.com/$NEW_GITHUB_USERNAME/$NEW_REPO_NAME.git"
+REPO_ROOT=$(get_repo_root)
 
 echo "📋 迁移配置:"
 echo "   原仓库: $(git remote get-url origin 2>/dev/null || echo '未设置')"
@@ -29,7 +37,7 @@ echo ""
 
 # 步骤 1: 检查当前仓库
 echo "📦 步骤 1/5: 验证当前仓库..."
-cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$REPO_ROOT"
 
 if [ ! -d ".config-store" ]; then
     echo "❌ 错误: 当前目录不是配置仓库（缺少 .config-store/）"
@@ -143,7 +151,7 @@ echo "================================"
 echo "🔗 重要链接:"
 echo "================================"
 echo "   新仓库: $NEW_REPO_URL"
-echo "   完整文档: $NEW_REPO_URL/blob/main/CROSS_ACCOUNT_MIGRATION.md"
+echo "   完整文档: $NEW_REPO_URL/blob/main/ENV_SYSTEM_MASTER.md"
 echo ""
 echo "🎉 迁移完成！"
 echo ""

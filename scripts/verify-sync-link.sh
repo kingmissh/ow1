@@ -42,16 +42,9 @@ done
 echo ""
 echo "3. 检查软链接..."
 
-# 读取配置文件
+# 从配置文件加载映射
 declare -A MAPPING
-while IFS='=' read -r key value; do
-    [[ "$key" =~ ^[[:space:]]*# ]] && continue
-    [[ -z "$key" ]] && continue
-    key=$(echo "$key" | xargs)
-    value=$(echo "$value" | xargs)
-    value="${value/\$HOME/$HOME}"
-    MAPPING["$key"]="$value"
-done < "$REPO_ROOT/.config-mapping"
+load_config_mapping MAPPING
 
 for store_name in "${!MAPPING[@]}"; do
     link="${MAPPING[$store_name]}"

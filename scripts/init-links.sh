@@ -22,17 +22,12 @@ echo ""
 
 echo "🔗 建立软链接..."
 
+# 检查依赖
+check_dependencies "git" || exit 1
+
 # 从配置文件加载映射
 declare -A MAPPING
-while IFS='=' read -r key value; do
-    [[ "$key" =~ ^[[:space:]]*# ]] && continue
-    [[ -z "$key" ]] && continue
-    key=$(echo "$key" | xargs)
-    value=$(echo "$value" | xargs)
-    # 展开 $HOME
-    value="${value/\$HOME/$HOME}"
-    MAPPING["$key"]="$value"
-done < "$REPO_ROOT/.config-mapping"
+load_config_mapping MAPPING
 
 # 建立链接
 for store_name in "${!MAPPING[@]}"; do
@@ -42,6 +37,11 @@ for store_name in "${!MAPPING[@]}"; do
     if [ -d "$STORE_PATH" ]; then
         echo "   链接 $store_name..."
         create_symlink "$STORE_PATH" "$TARGET" "$store_name"
+        
+        # 自动设置权限（如果是 credentials 目录）
+        if [[ "$TARGET" == *"credentials"* ]] && [ -d "$TARGET" ]; then
+            tighten_permissions "$TARGET"
+        fi
     fi
 done
 
@@ -59,14 +59,10 @@ inject_secret "OPENCLAW_API_KEY" "$HOME/.openclaw/credentials/openclaw.json" "ap
 echo ""
 
 # ==========================================
-# 第三部分: 权限防御
+# 第三部分: 权限防御（已在链接时设置）
 # ==========================================
 
-echo "🔒 设置权限..."
-
-tighten_permissions "$HOME/.openclaw/credentials"
-tighten_permissions "$HOME/.config/opencode"
-
+echo "🔒 权限检查完成"
 echo ""
 
 # ==========================================

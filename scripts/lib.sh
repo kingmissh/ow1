@@ -77,33 +77,45 @@ tighten_permissions() {
     fi
 }
 
-# 读取配置映射文件
+# 检查依赖命令
+check_dependencies() {
+    local deps=("$@")
+    for dep in "${deps[@]}"; do
+        if ! command -v "$dep" &> /dev/null; then
+            echo "❌ 缺少依赖: $dep" >&2
+            return 1
+        fi
+    done
+    return 0
+}
+
+# 读取配置映射文件到关联数组
+# 用法: load_config_mapping MAPPING
+# 注意: 需要在调用脚本中先声明: declare -A MAPPING
 load_config_mapping() {
+    local -n mapping_ref=$1
     local repo_root="$(get_repo_root)"
     local mapping_file="$repo_root/.config-mapping"
     
-    declare -A MAPPING
+    # 清空数组
+    mapping_ref=()
     
     if [ -f "$mapping_file" ]; then
         while IFS='=' read -r key value; do
             # 跳过注释和空行
             [[ "$key" =~ ^[[:space:]]*# ]] && continue
             [[ -z "$key" ]] && continue
-            # 去除空格
+            # 去除空格并展开 $HOME
             key=$(echo "$key" | xargs)
             value=$(echo "$value" | xargs)
-            MAPPING["$key"]="$value"
+            value="${value/\$HOME/$HOME}"
+            mapping_ref["$key"]="$value"
         done < "$mapping_file"
     fi
     
-    # 默认映射
-    if [ ${#MAPPING[@]} -eq 0 ]; then
-        MAPPING["openclaw"]="$HOME/.openclaw"
-        MAPPING["opencode"]="$HOME/.config/opencode"
+    # 默认映射（如果配置文件为空）
+    if [ ${#mapping_ref[@]} -eq 0 ]; then
+        mapping_ref["openclaw"]="$HOME/.openclaw"
+        mapping_ref["opencode"]="$HOME/.config/opencode"
     fi
-    
-    # 输出映射
-    for key in "${!MAPPING[@]}"; do
-        echo "$key=${MAPPING[$key]}"
-    done
 }
