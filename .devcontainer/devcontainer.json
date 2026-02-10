@@ -1,0 +1,34 @@
+{
+  "name": "OW1 - Config-Centric Workspace",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  
+  "postCreateCommand": "bash /workspaces/ow1/scripts/setup-env.sh",
+  
+  "postStartCommand": "echo '✅ 环境已恢复，运行 opencode auth login 配置 API Key'",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "eamodio.gitlens",
+        "ms-vscode.vscode-json"
+      ],
+      "settings": {
+        "git.enableSmartCommit": true,
+        "git.confirmSync": false,
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  
+  "remoteEnv": {
+    "CONFIG_STORE": "/workspaces/ow1/.config-store"
+  }
+}

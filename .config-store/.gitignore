@@ -1,0 +1,20 @@
+# 敏感信息（永不提交）
+.config-store/**/credentials/
+.config-store/**/identity/
+.config-store/**/*.key
+.config-store/**/*.pem
+.config-store/**/.env
+
+# 临时文件
+*.backup.*
+*.tmp
+*.log
+.DS_Store
+
+# 不需要版本化的缓存
+.config-store/**/cache/
+.config-store/**/node_modules/
+
+# 用户特定配置（可选）
+.config-store/**/history
+.config-store/**/local/
