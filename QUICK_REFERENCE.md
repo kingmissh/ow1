@@ -85,5 +85,5 @@ ls -la ~/.config/opencode
 
 ---
 
-**文档**: CROSS_ACCOUNT_MIGRATION.md  
+**文档**: ENV_SYSTEM_MASTER.md  
 **版本**: Sync-Link v2.0

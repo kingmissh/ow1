@@ -54,7 +54,7 @@ ow1/
 │   └── migrate-to-new-account.sh  # 🔄 跨账号迁移
 ├── .devcontainer/
 │   └── devcontainer.json      # postCreateCommand 自动调用 init-links.sh
-├── CROSS_ACCOUNT_MIGRATION.md # 📖 完整文档（架构 + 迁移 + 故障排除）
+├── ENV_SYSTEM_MASTER.md       # 📖 完整文档（架构 + SOP + 故障排除）
 └── README.md                  # 📍 本文件（快速开始）
 ```
 
@@ -147,7 +147,7 @@ reset-config
 
 ## 📖 详细文档
 
-- **[CROSS_ACCOUNT_MIGRATION.md](./CROSS_ACCOUNT_MIGRATION.md)** - 完整文档包含：
+- **[ENV_SYSTEM_MASTER.md](./ENV_SYSTEM_MASTER.md)** - 完整文档包含：
   - 系统架构设计
   - 脚本详细说明
   - 标准操作流程（4 大场景）
