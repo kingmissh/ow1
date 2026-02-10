@@ -42,28 +42,35 @@ git reset --hard HEAD^   # 软链接实时同步
 
 ## 📁 目录结构
 
+### 当前架构：中心配置仓库 + 子模块
+
 ```
-ow1/
-├── .config-store/              # ⭐ 配置保险箱（Git 跟踪）
-│   ├── opencode/              # → 链接到 ~/.config/opencode
-│   ├── openclaw/              # → 链接到 ~/.openclaw
-│   └── .gitignore             # 排除敏感信息
-├── scripts/
-│   ├── lib.sh                 # 📚 共享函数库
-│   ├── init-links.sh          # 🔧 初始化环境（自动调用）
-│   ├── add-tool.sh            # ➕ 添加新工具到管理
-│   ├── save-config.sh         # 💾 保存配置更改（实际脚本）
-│   ├── reset-config.sh        # 🔄 回滚配置（实际脚本）
-│   ├── verify-sync-link.sh    # ✅ 验证系统状态
-│   └── migrate-to-new-account.sh  # 🔄 跨账号迁移
-├── .config-mapping            # 🗺️ 配置映射文件（软链接目标定义）
-├── .devcontainer/
-│   └── devcontainer.json      # postCreateCommand 自动调用 init-links.sh
-├── USAGE_SCENARIOS.md         # ⭐ 使用场景指南（8个详细场景）
-├── ENV_SYSTEM_MASTER.md       # 📖 完整技术文档
-├── QUICK_REFERENCE.md         # 🎴 命令速查卡
-└── README.md                  # 📍 本文件（快速开始）
+my-dev-ops/ (中心配置仓库)          https://github.com/kingmissh/my-dev-ops
+├── scripts/                         # 配置管理脚本
+│   ├── lib.sh                      # 共享函数库
+│   ├── init-links.sh               # 初始化环境
+│   ├── add-tool.sh                 # 添加新工具
+│   ├── save-config.sh              # 保存配置
+│   ├── reset-config.sh             # 回滚配置
+│   └── ...
+├── .config-store/                   # 配置存储
+├── USAGE_SCENARIOS.md              # 使用场景指南
+└── ...
+         │
+         │ git submodule
+         ▼
+ow1/ (开发仓库)                      https://github.com/kingmissh/ow1
+├── .dev-ops/ → my-dev-ops          # ⭐ 子模块（配置管理中心）
+├── .gitmodules                      # 子模块配置
+├── src/                            # 你的开发代码
+├── package.json                    # 项目文件
+└── ...
 ```
+
+**优势**：
+- ✅ 配置和开发代码完全分离
+- ✅ 多个项目共享同一套配置
+- ✅ 提交历史干净（配置和代码分开）
 
 ## 🚀 快速开始
 
@@ -74,12 +81,15 @@ ow1/
 npm install -g opencode
 opencode auth login
 
-# 2. 将配置纳入 Git 管理
+# 2. 将配置纳入 Git 管理（通过子模块）
+cd .dev-ops
 ./scripts/add-tool.sh opencode .config/opencode
 
-# 3. 提交
+# 3. 提交到中心配置仓库
 git add .config-store/ && git commit -m "feat: add opencode config"
 git push
+
+cd ..  # 回到 ow1
 ```
 
 ### 日常使用
@@ -88,20 +98,26 @@ git push
 # 修改配置（通过工具界面）
 opencode
 
-# 保存到 Git
+# 保存到 Git（在 .dev-ops 目录中）
+cd .dev-ops
 save-commit
+# 或者: ./scripts/save-config.sh
 
 # 回滚（如果搞砸了）
 reset-config
+# 或者: ./scripts/reset-config.sh
+
+cd ..  # 回到 ow1
 ```
 
 ### 重建环境后
 
 **全自动** - 无需操作：
 1. Codespace 重建
-2. `init-links.sh` 自动运行
-3. 软链接重建 + Secrets 注入 + 别名设置
-4. 运行 `source ~/.bashrc` 加载别名
+2. 自动拉取子模块 `.dev-ops/`
+3. `.dev-ops/scripts/init-links.sh` 自动运行
+4. 软链接重建 + Secrets 注入 + 别名设置
+5. 运行 `source ~/.bashrc` 加载别名
 
 ---
 
@@ -171,38 +187,30 @@ reset-config
 
 ---
 
-## 🛠️ 脚本说明
+## 🛠️ 脚本说明（在 .dev-ops/ 子模块中）
 
-### init-links.sh
+### .dev-ops/scripts/init-links.sh
 - **作用**: 初始化软链接、注入 Secrets、设置别名
 - **调用**: 自动（postCreateCommand）或手动
-- **功能**: 
-  - 从 `.config-mapping` 读取配置并建立软链接
-  - 从 GitHub Secrets 注入 API Keys
-  - 设置快捷别名
-  - 设置权限防御
+- **用法**: `bash .dev-ops/scripts/init-links.sh`
 
-### add-tool.sh
+### .dev-ops/scripts/add-tool.sh
 - **作用**: 将新工具配置纳入 Git 管理
 - **调用**: 手动（安装新工具后）
-- **用法**: `./scripts/add-tool.sh <工具名> <配置路径>`
+- **用法**: `cd .dev-ops && ./scripts/add-tool.sh <工具名> <配置路径>`
 - **示例**: `./scripts/add-tool.sh opencode .config/opencode`
-- **特点**: 自动更新 `.config-mapping` 文件
 
-### save-config.sh ⭐（实际脚本）
-- **作用**: 提交配置更改到 Git
-- **调用**: `./scripts/save-config.sh [提交信息]`
-- **优势**: 不依赖别名，即使没有 `source ~/.bashrc` 也能使用
+### .dev-ops/scripts/save-config.sh
+- **作用**: 提交配置更改到 Git（实际脚本）
+- **用法**: `cd .dev-ops && ./scripts/save-config.sh [提交信息]`
 
-### reset-config.sh ⭐（实际脚本）
-- **作用**: 回滚配置更改
-- **调用**: `./scripts/reset-config.sh`
-- **优势**: 不依赖别名，即使没有 `source ~/.bashrc` 也能使用
+### .dev-ops/scripts/reset-config.sh
+- **作用**: 回滚配置更改（实际脚本）
+- **用法**: `cd .dev-ops && ./scripts/reset-config.sh`
 
-### migrate-to-new-account.sh
-- **作用**: 一键迁移配置到新 GitHub 账号
-- **调用**: 手动（跨账号迁移时）
-- **用法**: `NEW_GITHUB_USERNAME='name' NEW_REPO_NAME='repo' ./scripts/migrate-to-new-account.sh`
+### ./scripts/migrate-to-submodule.sh
+- **作用**: 从本地配置迁移到子模块模式（仅在 ow1 中）
+- **用法**: `./scripts/migrate-to-submodule.sh`
 
 ---
 
