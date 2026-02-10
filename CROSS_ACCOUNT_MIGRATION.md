@@ -8,7 +8,7 @@
 ## 📖 文档导航
 
 - [架构设计](#架构设计) - 三层数据模型与目录结构
-- [核心脚本](#核心脚本) - 4 个自动化管理脚本
+- [核心脚本](#核心脚本) - 2 个核心脚本 + 快捷命令
 - [快速开始](#快速开始) - 首次配置指南
 - [标准操作流程](#标准操作流程-sop) - 4 大场景操作手册
 - [跨账号迁移](#跨账号迁移指南) - 多账号/团队协作方案
@@ -46,8 +46,8 @@ ow1/                                        # 项目仓库（Layer 1）
 │   ├── git/                               # → 链接到 ~/.config/git/
 │   └── .gitignore                         # 敏感信息排除规则
 ├── scripts/                               # 环境管理脚本
-│   ├── manage-config.sh                   # 将配置纳入 Git 管理
-│   ├── setup-env.sh                       # 一键恢复环境
+│   ├── add-tool.sh                   # 将配置纳入 Git 管理
+│   ├── init-links.sh                       # 一键恢复环境
 │   ├── save-config.sh                     # 保存配置更改
 │   └── switch-env.sh                      # 切换环境分支
 ├── .devcontainer/
@@ -78,13 +78,13 @@ ow1/                                        # 项目仓库（Layer 1）
 
 ## 核心脚本
 
-### 脚本 A: manage-config.sh（纳入管理）
+### 脚本 A: add-tool.sh（纳入管理）
 
 **用途**: 将现有配置从 `~/.config/` 移动到 `.config-store/`，并建立软链接
 
 ```bash
 #!/bin/bash
-# manage-config.sh - 将现有配置纳入 Git 管理
+# add-tool.sh - 将现有配置纳入 Git 管理
 
 set -e
 
@@ -151,13 +151,13 @@ echo "   2. git add .config-store/"
 echo "   3. git commit -m 'feat: add tool configurations'"
 ```
 
-### 脚本 B: setup-env.sh（一键恢复）
+### 脚本 B: init-links.sh（一键恢复）
 
 **用途**: 从 `.config-store/` 恢复软链接，自动注入 Secrets
 
 ```bash
 #!/bin/bash
-# setup-env.sh - 一键恢复环境配置
+# init-links.sh - 一键恢复环境配置
 
 set -e
 
@@ -177,7 +177,7 @@ echo ""
 # 检查仓库目录是否存在
 if [ ! -d "$REPO_STORE" ]; then
     echo "❌ 错误: $REPO_STORE 不存在"
-    echo "   请先运行 ./scripts/manage-config.sh 纳入配置"
+    echo "   请先运行 ./scripts/add-tool.sh 纳入配置"
     exit 1
 fi
 
@@ -235,7 +235,7 @@ echo "   • 运行 'opencode auth login' 验证授权（如需要）"
 echo "   • 检查工具配置是否生效"
 ```
 
-### 脚本 C: save-config.sh（保存更改）
+### 快捷命令: save-commit (保存)（保存更改）
 
 **用途**: 保存 `.config-store/` 的更改到 Git
 
@@ -282,7 +282,7 @@ else
 fi
 ```
 
-### 脚本 D: switch-env.sh（环境切换）
+### 快捷命令: reset-config (回滚)（环境切换）
 
 **用途**: 切换 Git 分支并恢复对应配置
 
@@ -329,7 +329,7 @@ fi
 # 重新建立链接（因为切换分支可能改变了 .config-store 内容）
 echo ""
 echo "🔗 重新建立配置链接..."
-"$(dirname "$0")/setup-env.sh"
+"$(dirname "$0")/init-links.sh"
 
 echo ""
 echo "✅ 已切换到 $BRANCH 环境"
@@ -378,7 +378,7 @@ npm install -g opencode
 opencode auth login  # 完成初始配置
 
 # 3. 将配置纳入 Git 管理
-./scripts/manage-config.sh
+./scripts/add-tool.sh
 
 # 4. 提交配置
 ./scripts/save-config.sh "feat: init opencode config"
@@ -391,7 +391,7 @@ git push
 
 ```bash
 # 自动执行（已通过 devcontainer.json 配置）
-./scripts/setup-env.sh
+./scripts/init-links.sh
 
 # 验证
 ls -la ~/.config/opencode  # 应该是软链接
@@ -409,14 +409,14 @@ opencode --version         # 测试工具
 npm install -g some-tool
 some-tool configure
 
-# 更新配置列表（编辑 manage-config.sh）
+# 更新配置列表（编辑 add-tool.sh）
 # declare -A CONFIGS=(
 #     ...
 #     [".config/some-tool"]="some-tool"
 # )
 
 # 纳入管理并保存
-./scripts/manage-config.sh
+./scripts/add-tool.sh
 ./scripts/save-config.sh "feat: add some-tool config"
 ```
 
@@ -431,7 +431,7 @@ git checkout .config-store/  # 配置文件立即恢复
 
 # 方法 C: 完全重建（终极方案）
 # 1. 在 Codespaces 面板点击 "Rebuild Container"
-# 2. 重启后自动运行 setup-env.sh
+# 2. 重启后自动运行 init-links.sh
 ```
 
 ### 场景 3: 多环境测试（GPT-4 vs Claude）
@@ -531,7 +531,7 @@ git clone https://github.com/new-account/my-dev-ops.git
 cd my-dev-ops
 
 # 2. 运行恢复脚本
-./scripts/setup-env.sh
+./scripts/init-links.sh
 
 # 3. 验证敏感信息注入
 ls -la ~/.config/opencode/credentials.json  # 应存在且由 Secrets 注入
@@ -546,12 +546,12 @@ git submodule add https://github.com/new-account/my-dev-ops.git .dev-ops
 git submodule update --init --recursive
 
 # 2. 运行设置脚本
-bash .dev-ops/scripts/setup-env.sh
+bash .dev-ops/scripts/init-links.sh
 
 # 3. 配置自动化（devcontainer.json）
 # 在 .devcontainer/devcontainer.json 中添加:
 {
-  "postCreateCommand": "git submodule update --init --recursive && bash .dev-ops/scripts/setup-env.sh",
+  "postCreateCommand": "git submodule update --init --recursive && bash .dev-ops/scripts/init-links.sh",
   "remoteEnv": {
     "OPENCODE_API_KEY": "${secrets.OPENCODE_API_KEY}",
     "OPENCLAW_API_KEY": "${secrets.OPENCLAW_API_KEY}"
@@ -609,7 +609,7 @@ echo "   新仓库地址: $NEW_REPO_URL"
 echo ""
 echo "📋 迁移完成后的检查清单:"
 echo "   □ 在新 Codespace 克隆仓库"
-echo "   □ 运行 ./scripts/setup-env.sh"
+echo "   □ 运行 ./scripts/init-links.sh"
 echo "   □ 验证工具配置"
 echo "   □ 测试 API 调用"
 echo ""
@@ -686,7 +686,7 @@ git clone https://github.com/template/my-dev-ops-template.git my-dev-ops
 cd my-dev-ops
 
 # 3. 添加自己的配置
-./scripts/manage-config.sh
+./scripts/add-tool.sh
 ./scripts/save-config.sh "init: personal config"
 
 # 4. 推送到自己的私有仓库
@@ -705,11 +705,11 @@ git push -u origin main
 **解决方案**:
 ```bash
 # 重新建立链接
-./scripts/setup-env.sh
+./scripts/init-links.sh
 
 # 如果链接指向错误路径，先删除再重建
 rm -rf ~/.config/opencode
-./scripts/setup-env.sh
+./scripts/init-links.sh
 ```
 
 ### 问题 2: Secrets 未注入
@@ -757,7 +757,7 @@ echo ".config-store/**/credentials/" >> .gitignore
 mv ~/.openclaw ~/.openclaw.backup.$(date +%s)
 
 # 重新建立链接
-./scripts/setup-env.sh
+./scripts/init-links.sh
 
 # 或使用 stow 模式管理多版本（高级）
 ```
@@ -774,7 +774,7 @@ mv ~/.openclaw ~/.openclaw.backup.$(date +%s)
 | 保存配置 | `./scripts/save-config.sh` | 每次修改后 |
 | 推送远程 | `git push` | 每天/每周 |
 | 创建环境 | `./scripts/switch-env.sh env/name` | 按需 |
-| 重建环境 | `./scripts/setup-env.sh` | 重建后 |
+| 重建环境 | `./scripts/init-links.sh` | 重建后 |
 
 ### 安全清单
 
@@ -812,7 +812,7 @@ find .config-store -name "*.backup.*" -mtime +30 -delete
     }
   },
   
-  "postCreateCommand": "bash scripts/setup-env.sh",
+  "postCreateCommand": "bash scripts/init-links.sh",
   
   "postStartCommand": "echo '✅ 环境已恢复。如需配置 API Key，检查 GitHub Secrets 设置'",
   
@@ -847,8 +847,8 @@ find .config-store -name "*.backup.*" -mtime +30 -delete
 
 ```bash
 # 配置管理
-./scripts/manage-config.sh      # 纳入管理
-./scripts/setup-env.sh          # 恢复环境
+./scripts/add-tool.sh      # 纳入管理
+./scripts/init-links.sh          # 恢复环境
 ./scripts/save-config.sh        # 保存更改
 ./scripts/switch-env.sh <branch> # 切换环境
 

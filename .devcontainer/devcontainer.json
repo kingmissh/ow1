@@ -9,9 +9,11 @@
     }
   },
   
-  "postCreateCommand": "bash /workspaces/ow1/scripts/setup-env.sh",
+  "postCreateCommand": "bash scripts/init-links.sh && echo '✅ Sync-Link 环境已初始化。运行 source ~/.bashrc 加载快捷命令'",
   
-  "postStartCommand": "echo '✅ 环境已恢复，运行 opencode auth login 配置 API Key'",
+  "postStartCommand": "echo '🚀 快捷命令: save (查看更改) | save-commit (提交) | reset-config (回滚)'",
+  
+  "onCreateCommand": "echo 'alias' >> /home/codespace/.bashrc",
   
   "customizations": {
     "vscode": {
